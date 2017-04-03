@@ -1,3 +1,8 @@
+//author : Zhipeng Li s3581721
+
+
+
+
 import java.util.Random;
 
 public class Sprinters extends Athletes {

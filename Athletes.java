@@ -1,3 +1,5 @@
+//author : Zhipeng Li s3581721
+
 
 public abstract class Athletes extends Participant {
 

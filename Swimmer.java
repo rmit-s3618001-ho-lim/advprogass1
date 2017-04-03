@@ -1,3 +1,7 @@
+// author : Cherng Ho Lim s3618001
+
+
+
 import java.util.Random;
 
 public class Swimmer extends Athletes {

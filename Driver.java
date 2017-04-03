@@ -1,3 +1,6 @@
+//author: Cherng Ho Lim s3618001
+
+
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -6,6 +9,10 @@ import java.util.Scanner;
 
 public class Driver {
 
+	
+	/* variables used for keeping track of number of games created
+	 * also used for making new ID for games */
+	 
 	private int swimcount;
 	private int runcount;
 	private int cyclecount;
@@ -332,7 +339,7 @@ public class Driver {
 
 	/*
 	 * informs user whether they predicted the winner correctly or not
-	 * 
+	 * display a different message if a winner was not predicted
 	 */
 	public void congratulations(Game theGame, String predict) {
 		Athletes first = theGame.getWinner1();
