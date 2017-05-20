@@ -1,8 +1,3 @@
-import Exception.TooFewAthleteException;
-import Exception.NoRefereeException;
-import Exception.GameFullException;
-import Exception.GameHadRunException;
-import Exception.GameNotExistException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import javafx.application.Application;

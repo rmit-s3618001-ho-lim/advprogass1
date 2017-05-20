@@ -1,5 +1,3 @@
-import Exception.SameAthleteException;
-import Exception.WrongTypeException;
 
 public class SwimmingGame extends Game{
 	

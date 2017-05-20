@@ -1,13 +1,5 @@
 import java.util.ArrayList;
 
-import Exception.GameFullException;
-import Exception.GameHadRunException;
-import Exception.GameNotExistException;
-import Exception.NoRefereeException;
-import Exception.SameAthleteException;
-import Exception.TooFewAthleteException;
-import Exception.WrongTypeException;
-
 public class Exceptions {
 
 }
