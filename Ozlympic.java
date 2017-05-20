@@ -1,5 +1,3 @@
-//author: Cherng Ho Lim s3618001
-
 
 public class Ozlympic {
 	
@@ -8,9 +6,7 @@ public class Ozlympic {
 	 * ==================================================
 	 */
 	public static void main(String[] args){
-		Driver mydriver = new Driver();
-		mydriver.runDriver();
-		 
+		Driver.launch(Driver.class);
 		
 	}
 

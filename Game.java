@@ -1,6 +1,3 @@
-//author : Zhipeng Li s3581721
-
-
 public class Game {
 
 	private String gameID;
@@ -41,7 +38,11 @@ public class Game {
 	public Athletes getWinner3() {
 		return this.winner3;
 	}
-
+	
+	public void setOfficial(Official theOfficial) {
+		this.officer = theOfficial;
+	}
+	
 	public void setWinner1(Athletes first) {
 		this.winner1 = first;
 	}
@@ -53,5 +54,21 @@ public class Game {
 	public void setWinner3(Athletes third) {
 		this.winner3 = third;
 	}
+	
+	/* choosing print method depending on type of current game */
+	public String showGame(Game theGame) {
+		if (theGame instanceof SwimmingGame) {
+			String data = ((SwimmingGame) theGame).print();
+			return data;
+		} else if (theGame instanceof RunningGame) {
+			String data = ((RunningGame) theGame).print();
+			return data;
+		} else {
+			String data = ((CyclingGame) theGame).print();
+			return data;
+		}
+
+	}
 
 }
+

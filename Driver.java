@@ -1,322 +1,791 @@
-//author: Cherng Ho Lim s3618001
-
-
-
+import Exception.TooFewAthleteException;
+import Exception.NoRefereeException;
+import Exception.GameFullException;
+import Exception.GameHadRunException;
+import Exception.GameNotExistException;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.Random;
-import java.util.Scanner;
+import javafx.application.Application;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
+import javafx.scene.layout.GridPane;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
+import javafx.scene.text.Text;
+import javafx.stage.Stage;
 
-public class Driver {
+public class Driver extends Application {
 
-	
-	/* variables used for keeping track of number of games created
-	 * also used for making new ID for games */
-	 
+	/*
+	 * variables used for keeping track of number of games created also used for
+	 * making new ID for games
+	 */
+
+	Database db = new Database();
+
+	private boolean dbConnect = true;
+	private boolean txtConnect = true;
+
+	/* used for creating game purposes */
 	private int swimcount;
 	private int runcount;
 	private int cyclecount;
-	private String winpredict;
 
-	Official officialList[] = new Official[3];
-	Swimmer swimList[] = new Swimmer[5];
-	Sprinters sprinterList[] = new Sprinters[5];
-	Cyclists cyclistList[] = new Cyclists[5];
-	Superathletes superList[] = new Superathletes[3];
+	Official officialchoice;
+	Game newGame = new Game();
+	
+	NotEnoughAthletes check = new NotEnoughAthletes();
+	NoReferee refcheck = new NoReferee();
+	gameExist gamecheck = new gameExist();
+	gameRunOnce runcheck = new gameRunOnce();
+	gameFull fullcheck = new gameFull();
 
-	Athletes competitors[] = new Athletes[8];
+
+	ArrayList<Swimmer> fullSwim = new ArrayList<Swimmer>();
+	ArrayList<Sprinters> fullSprint = new ArrayList<Sprinters>();
+	ArrayList<Cyclists> fullCycle = new ArrayList<Cyclists>();
+	ArrayList<Superathletes> fullSuper = new ArrayList<Superathletes>();
+	ArrayList<Official> fullOff = new ArrayList<Official>();
+
+	Official officialList[] = null;
+	Swimmer swimList[] = null;
+	Sprinters sprinterList[] = null;
+	Cyclists cyclistList[] = null;
+	Superathletes superList[] = null;
+
+	Athletes[] fullList = null;
+
+	Athletes[] competitors = new Athletes[8];
 
 	ArrayList<Game> gameList = new ArrayList<Game>();
 
-	/*
-	 * load in the official, swimmer, sprinters, cyclists and superathletes
-	 * before showing the main menu
-	 */
-	public void runDriver() {
-		Official offload = new Official();
-		offload.loadOfficials(officialList);
-
-		Swimmer swimload = new Swimmer();
-		swimload.loadSwimmers(swimList);
-
-		Sprinters sprintload = new Sprinters();
-		sprintload.loadSprinters(sprinterList);
-
-		Cyclists cycleload = new Cyclists();
-		cycleload.loadCyclists(cyclistList);
-
-		Superathletes supload = new Superathletes();
-		supload.loadSuperAthletes(superList);
-
-		while (true) {
-			menu();
+	@Override
+	public void start(Stage primaryStage) throws Exception {
+		/*
+		 * attempts to connect to database. if fails, attempts to take data from
+		 * text file if both fails, exit program
+		 */
+		dbConnect = db.connection();
+		if (dbConnect == true) {
+			db.insertParticipants();
+			db.getAllParticipants(fullSwim, fullSprint, fullCycle, fullSuper, fullOff);
+		} else {
+			System.out.println("Connection to database has failed!");
+			System.out.println("Attempting to use text file instead...");
+			txtConnect = db.readParticipants(fullSwim, fullSprint, fullCycle, fullSuper, fullOff);
+			if (txtConnect == false) {
+				System.out.println("Connection to the database and text file has failed!!");
+				System.out.println("Exiting program...");
+				System.exit(0);
+			}
 		}
 
+		/*
+		 * load in the official, swimmer, sprinters, cyclists and superathletes
+		 * before showing the main menu
+		 */
+		officialList = fullOff.toArray(new Official[fullOff.size()]);
+
+		swimList = fullSwim.toArray(new Swimmer[fullSwim.size()]);
+
+		cyclistList = fullCycle.toArray(new Cyclists[fullCycle.size()]);
+
+		sprinterList = fullSprint.toArray(new Sprinters[fullSprint.size()]);
+
+		superList = fullSuper.toArray(new Superathletes[fullSuper.size()]);
+
+		fullList = new Athletes[swimList.length + sprinterList.length + cyclistList.length + superList.length];
+
+		System.arraycopy(swimList, 0, fullList, 0, swimList.length);
+
+		System.arraycopy(sprinterList, 0, fullList, swimList.length, sprinterList.length);
+
+		System.arraycopy(cyclistList, 0, fullList, sprinterList.length + swimList.length, cyclistList.length);
+		System.arraycopy(superList, 0, fullList, sprinterList.length + swimList.length + cyclistList.length,
+				superList.length);
+
+		/* create window for main menu */
+		Scene scene = new Scene(MainMenu(), 1280, 720);
+		primaryStage.setTitle("Ozlympic");
+		primaryStage.setScene(scene);
+		primaryStage.show();
 	}
 
-	/*
-	 * ==============================================================
-	 * ==================== MAIN MENU =================================
-	 * =========================== =====================================
-	 */
+	/**
+	 * ----------------------------------------------------------
+	 * --------------------------------------------------------- -------------
+	 * MAIN MENU -----------------------------------
+	 * ----------------------------------------------------------
+	 * -----------------------------------------------------
+	 **/
 
-	public void menu() {
-		Scanner scan = new Scanner(System.in);
+	public GridPane MainMenu() {
+		GridPane pane = new GridPane();
+		pane.setPadding(new Insets(15.5, 10.5, 15.5, 10.5));
+		pane.setHgap(30);
+		pane.setVgap(40);
 
-		do {
-			System.out.println();
-			System.out.println("====== Ozlympic Menu ======");
-			System.out.println("<1> Create a game to run");
-			System.out.println("<2> Predict the winner of the game");
-			System.out.println("<3> Start the game");
-			System.out.println("<4> Display the final results of all games");
-			System.out.println("<5> Display the points of all athletes");
-			System.out.println("<6> Exit");
+		Text text1 = new Text(30, 20, "MAIN MENU");
+		text1.setFont(Font.font("Courier", FontWeight.BOLD, 30));
+		text1.setUnderline(true);
+
+		Label lab = new Label();
+		lab.setTextFill(Color.RED);
+		lab.setFont(Font.font(20));
+
+		/** Button to create a new game **/
+		Button create = new Button("Create a game to run");
+		create.setTextFill(Color.BLUE);/* add button to stage(window) */
+		create.setFont(Font.font(20)); /* set color and font size */
+		create.setOnAction(a -> create.getScene().setRoot(createGameMenu()));
+
+		/** Button to start the game **/
+		Button gameStart = new Button("Start the game");
+		gameStart.setTextFill(Color.BLUE);/* add button to stage(window) */
+		gameStart.setFont(Font.font(20));
+		gameStart.setOnAction(b -> {
 
 			try {
-				String s = scan.nextLine();
-				int input = Integer.parseInt(s);
+				gamecheck.validate(gameList);
+				check.validate(competitors);
+				Game gam = gameList.get((gameList.size() - 1));
+				runcheck.validate(gam);
+				refcheck.validate(gam);
+				System.out.println("Starting game...");
+				create.getScene().setRoot(startGame(gam));
 
-				if (input == 1) {
-					newGame();
-				} else if (input == 2) {
-					predictMenu();
-				} else if (input == 3) {
-					/*
-					 * Check whether the user has already chosen a game or not
-					 * Only runs game if a game has been chosen and the game has
-					 * 4 or more participants
-					 */
-					if (gameList.size() == 0) {
-						System.out.println("There is no game to run.");
-						System.out.println("Choose option 1 to create a new game");
-					} else {
-						int count = 0;
-						for (int i = 0; i < competitors.length; i++) {
-							if (competitors[i] == null) {
-								count++;
-							}
-						}
-						if (count >= 5) {
-							System.out.println("There are not enough participants in this game");
-							System.out.println("Choose option 1 to create a new game");
-						} else {
-							System.out.println("Starting game...");
-							Game gam = gameList.get((gameList.size() - 1));
-							startGame(gam);
-						}
-					}
-
-				} else if (input == 4) {
-					gameResults();
-				} else if (input == 5) {
-					athletesPoints();
-				} else if (input == 6) {
-					System.out.println("Exiting program...");
-					System.exit(0);
-					scan.close();
-				} else {
-					System.out.println("Please choose an option between 1-6");
-				}
-			} catch (Exception e) {
-				System.out.println("Please input a number");
+			} catch (TooFewAthleteException e) {
+				lab.setText("There are not enough participants in this game. Choose option 1 to create a new game");
+			} catch (NoRefereeException e) {
+				lab.setText("There is no referee in this game");
+			} catch (GameNotExistException e) {
+				lab.setText("There is no game to run. Choose option 1 to create a new game");
+			} catch (GameHadRunException e) {
+				lab.setText("The game has already been run");
 			}
+		});
 
-		} while (true);
+		Button gameResults = new Button("Display results of finished games");
+		gameResults.setTextFill(Color.BLUE);
+		gameResults.setFont(Font.font(20));
+		gameResults.setOnAction(c -> gameResults.getScene().setRoot(
+
+				gameResults()));
+
+		Button athPoints = new Button("Display all athletes points");
+		athPoints.setTextFill(Color.BLUE);
+		athPoints.setFont(Font.font(20));
+		athPoints.setOnAction(d -> athPoints.getScene().setRoot(athleteList()));
+
+		/** Button to exit program **/
+		Button exit = new Button("Exit");
+		exit.setTextFill(Color.RED);
+		exit.setFont(Font.font(20));
+		exit.setOnAction(e -> {
+			System.out.println("Exiting program");
+			System.exit(0);
+		});
+
+		pane.add(text1, 3, 1);
+		pane.add(create, 3, 3);
+		pane.add(gameStart, 3, 4);
+		pane.add(gameResults, 3, 5);
+		pane.add(athPoints, 3, 6);
+		pane.add(exit, 3, 7);
+		pane.add(lab, 3, 8);
+
+		return pane;
+	}
+
+	
+
+	/*----------------------------------------------
+	 * ----------------------------------------------
+	 * ---------- CREATE GAME MENU------------------
+	 * ---------------------------------------------
+	 * ----------------------------------------------
+	 */
+	public GridPane createGameMenu() {
+
+		GridPane pane = new GridPane();
+		pane.setPadding(new Insets(15.5, 10.5, 15.5, 45.5));
+		pane.setVgap(40);
+
+		Text text1 = new Text(20, 20, "GAME MENU");
+		text1.setFont(Font.font("Courier", FontWeight.BOLD, 30));
+		text1.setUnderline(true);
+
+		Text text2 = new Text(20, 20, "Note: Selecting a new game will cancel/finish the previous game");
+		text2.setFont(Font.font("Courier", FontWeight.NORMAL, 14));
+
+		Button swimGame = new Button("Create swimming game");
+		swimGame.setTextFill(Color.BLUE);/* add button to stage(window) */
+		swimGame.setFont(Font.font(20));
+
+		swimGame.setOnAction(a -> {
+			competitors = new Athletes[competitors.length];
+			SwimmingGame swim = new SwimmingGame();
+			String swimID = swim.IDMaker(swimcount);
+			newGame = new SwimmingGame(swimID, null);
+			officialchoice = null;
+			swimcount++;
+			swimGame.getScene().setRoot(swimGameMenu());
+		});
+
+		Button runGame = new Button("Create running game");
+		runGame.setTextFill(Color.BLUE);/* add button to stage(window) */
+		runGame.setFont(Font.font(20));
+		runGame.setOnAction(a -> {
+			competitors = new Athletes[competitors.length];
+			RunningGame run = new RunningGame();
+			String runID = run.IDMaker(runcount);
+			newGame = new RunningGame(runID, null);
+			officialchoice = null;
+			runcount++;
+			runGame.getScene().setRoot(runGameMenu());
+		});
+
+		Button cycGame = new Button("Create cycling game");
+		cycGame.setTextFill(Color.BLUE);/* add button to stage(window) */
+		cycGame.setFont(Font.font(20));
+		cycGame.setOnAction(a -> {
+			competitors = new Athletes[competitors.length];
+			CyclingGame cyc = new CyclingGame();
+			String cycID = cyc.IDMaker(runcount);
+			newGame = new CyclingGame(cycID, null);
+			officialchoice = null;
+			cyclecount++;
+			cycGame.getScene().setRoot(cycleGameMenu());
+		});
+
+		Button ret = new Button("Return to previous menu");
+		ret.setTextFill(Color.RED);/* add button to stage(window) */
+		ret.setFont(Font.font(20));
+		ret.setOnAction(e -> ret.getScene().setRoot(MainMenu()));
+
+		pane.add(text1, 3, 0);
+		pane.add(swimGame, 3, 2);
+		pane.add(runGame, 3, 3);
+		pane.add(cycGame, 3, 4);
+		pane.add(ret, 3, 5);
+		pane.add(text2, 3, 6);
+
+		return pane;
 
 	}
 
-	/************************************************************************/
-	/* to create a new game when the user chooses option 1 */
-	/************************************************************************/
+	/*----------------------------------------------
+	 * ---------------------------------------------
+	 * ------------ CREATE SWIMMING GAME MENU-------
+	 * ----------------------------------------------
+	 */
 
-	public void newGame() {
-		Scanner scan = new Scanner(System.in);
-		do {
-			System.out.println();
-			System.out.println("====== Game Menu ======");
-			System.out.println("<1> Swimming");
-			System.out.println("<2> Cycling");
-			System.out.println("<3> Running");
-			System.out.println("<4> Return to previous menu");
-			System.out.println();
-			System.out.println("Note: Selecting a new game will cancel/finish the previous game");
+	public GridPane swimGameMenu() {
 
-			try {
+		GridPane pane = new GridPane();
+		pane.setPadding(new Insets(15.5, 10.5, 15.5, 45.5));
+		pane.setHgap(10);
+		pane.setVgap(40);
 
-				String s = scan.nextLine();
-				int input = Integer.parseInt(s);
-				/*
-				 * creating a new Swimming Game and its ID, and choosing its
-				 * official and participants. Also resets user's prediction
-				 */
-				if (input == 1) {
-					winpredict = null;
-					competitors = new Athletes[competitors.length];
-					SwimmingGame swim = new SwimmingGame();
-					String swimID = swim.IDMaker(swimcount);
-					Official officialchoice = officialList[chooseOfficial(officialList)];
-					Game newGame = new SwimmingGame(swimID, officialchoice);
-					showGame(newGame);
-					gameList.add(newGame);
-					competitorsNumber(newGame);
-					displayCompetitors();
-					swimcount++;
-					menu();
-					/*
-					 * creating a new Cycling Game and its ID, and choosing its
-					 * official and participants. Also resets user's prediction
-					 */
-				} else if (input == 2) {
-					winpredict = null;
-					competitors = new Athletes[competitors.length];
-					CyclingGame cycle = new CyclingGame();
-					String cycleID = cycle.IDMaker(cyclecount);
-					Official officialchoice = officialList[chooseOfficial(officialList)];
-					Game newGame = new CyclingGame(cycleID, officialchoice);
-					showGame(newGame);
-					gameList.add(newGame);
-					competitorsNumber(newGame);
-					displayCompetitors();
-					cyclecount++;
-					menu();
-					/*
-					 * creating a new Running Game and its ID, and choosing its
-					 * official and participants. Also resets user's prediction
-					 */
-				} else if (input == 3) {
-					winpredict = null;
-					competitors = new Athletes[competitors.length];
-					RunningGame run = new RunningGame();
-					String runID = run.IDMaker(runcount);
-					Official officialchoice = officialList[chooseOfficial(officialList)];
-					Game newGame = new RunningGame(runID, officialchoice);
-					showGame(newGame);
-					gameList.add(newGame);
-					competitorsNumber(newGame);
-					displayCompetitors();
-					runcount++;
-					menu();
-					/*
-					 * return to the previous menu
-					 */
-				} else if (input == 4) {
-					System.out.println("Returning to previous menu...");
-					menu();
-				} else {
-					System.out.println("Please choose an option between 1-4");
-				}
-			} catch (Exception e) {
-				System.out.println("Please choose an option between 1-4");
+		Text text1 = new Text(20, 20, "SWIMMING GAME MENU");
+		text1.setFont(Font.font("Courier", FontWeight.BOLD, 28));
+		text1.setUnderline(true);
+
+		Label lab = new Label();
+		lab.setTextFill(Color.RED);/* add button to stage(window) */
+		lab.setFont(Font.font(20));
+
+		Text text2 = new Text(20, 20,
+				"Note: Upon returning to main menu," + " you cannot add athletes or officials to the game anymore");
+		text2.setFont(Font.font("Courier", FontWeight.NORMAL, 14));
+
+		Button addAth = new Button("Add Athletes");
+		addAth.setTextFill(Color.BLUE);/* add button to stage(window) */
+		addAth.setFont(Font.font(20));
+		addAth.setOnAction(e -> {
+			try{
+				fullcheck.validate(competitors);
+				addAth.getScene().setRoot(chooseSwimmer());
+			}catch(GameFullException a){
+				lab.setText("You cannot add more than 8 athletes in a game");
 			}
+		});
 
-		} while (true);
+		Button addOff = new Button("Add Official");
+		addOff.setTextFill(Color.BLUE);/* add button to stage(window) */
+		addOff.setFont(Font.font(20));
+		addOff.setOnAction(e -> addOff.getScene().setRoot(chooseOfficial()));
 
+		Button ret = new Button("Return to main menu");
+		ret.setTextFill(Color.RED);/* add button to stage(window) */
+		ret.setFont(Font.font(20));
+		ret.setOnAction(e -> {
+			gameList.add(newGame);
+			ret.getScene().setRoot(newGameDetails());
+		});
+
+		pane.add(text1, 3, 0);
+		pane.add(addAth, 3, 1);
+		pane.add(addOff, 3, 2);
+		pane.add(ret, 3, 3);
+		pane.add(text2, 3, 4);
+		pane.add(lab, 3, 6);
+
+		return pane;
 	}
 
-	/* randomly choosing an official */
-	public int chooseOfficial(Official[] List) {
-		Random rng = new Random();
-		int offChoice = rng.nextInt(List.length);
-		return offChoice;
-	}
+	/*-----------------------------------
+	 * ------------------------------------
+	 * ----- CHOOSE SWIMMER DISPLAY---------
+	 * -----------------------------
+	 * ------------------------------------
+	 */
+	public GridPane chooseSwimmer() {
 
-	/* randomly choosing the number of participants in current game */
-	public void competitorsNumber(Game theGame) {
-		Random rng = new Random();
-		int number = 2 + rng.nextInt(7);
-		if (theGame instanceof SwimmingGame) {
-			((SwimmingGame) theGame).chooseCompetitors(competitors, swimList, superList, number);
-		} else if (theGame instanceof RunningGame) {
-			((RunningGame) theGame).chooseCompetitors(competitors, sprinterList, superList, number);
-		} else {
-			((CyclingGame) theGame).chooseCompetitors(competitors, cyclistList, superList, number);
+		GridPane pane = new GridPane();
+		pane.setPadding(new Insets(15.5, 10.5, 15.5, 45.5));
+		pane.setHgap(10);
+		pane.setVgap(5);
+		Text text1 = new Text(20, 20, "ATHLETE LIST");
+		text1.setFont(Font.font("Courier", FontWeight.BOLD, 25));
+		text1.setUnderline(true);
+		Text text2 = new Text(20, 20, "To add a swimmer/superathlete, enter his ID:");
+		text2.setFont(Font.font("Courier", FontWeight.NORMAL, 25));
+		Label lab = new Label();
+		lab.setTextFill(Color.RED);/* add button to stage(window) */
+		lab.setFont(Font.font(20));
+
+		TextField addAth = new TextField();
+		addAth.setFont(Font.font(20));
+		addAth.setOnAction(e -> {
+			String ID = addAth.getText();
+
+			/*
+			 * to check whether the athlete can be added to game and why returns
+			 * to create game menu when finished
+			 */
+			int swimError = ((SwimmingGame) newGame).chooseCompetitors(competitors, fullList, ID);
+			if (swimError == -2) {
+				lab.setText("You cannot add the same athlete into a game");
+			} else if (swimError == -1) {
+				lab.setText("The inputted ID does not exist");
+			} else if (swimError == 0) {
+				lab.setText("You must choose swimmers or superathletes");
+			} else {
+				addAth.getScene().setRoot(swimGameMenu());
+			}
+		});
+
+		/* listing out all athletes available */
+		pane.add(text1, 2, 0);
+		for (int i = 0; i < fullList.length; i++) {
+			Text atxt = new Text(athletesPoints(fullList[i]));
+			atxt.setFont(Font.font("Courier", FontWeight.NORMAL, 14));
+			pane.add(atxt, 2, i + 1);
 		}
+		pane.add(text2, 2, fullList.length + 4);
+		pane.add(addAth, 3, fullList.length + 4);
+		pane.add(lab, 2, fullList.length + 6);
 
+		return pane;
 	}
 
-	/* choosing print method depending on type of current game */
-	public void showGame(Game theGame) {
-		if (theGame instanceof SwimmingGame) {
-			((SwimmingGame) theGame).print();
-		} else if (theGame instanceof RunningGame) {
-			((RunningGame) theGame).print();
-		} else {
-			((CyclingGame) theGame).print();
-		}
+	/*------------------------------------------------------------
+	 * -----------------------------------------------------------
+	 * ---------------- CREATE RUNNING GAME MENU -----------------
+	 * -----------------------------------------------------------
+	 */
+	public GridPane runGameMenu() {
 
+		GridPane pane = new GridPane();
+		pane.setPadding(new Insets(15.5, 10.5, 15.5, 45.5));
+		pane.setHgap(10);
+		pane.setVgap(40);
+
+		Text text1 = new Text(20, 20, "RUNNING GAME MENU");
+		text1.setFont(Font.font("Courier", FontWeight.BOLD, 28));
+		text1.setUnderline(true);
+
+		Label lab = new Label();
+		lab.setTextFill(Color.RED);/* add button to stage(window) */
+		lab.setFont(Font.font(20));
+
+		Text text2 = new Text(20, 20,
+				"Note: Upon returning to main menu," + " you cannot add athletes or officials to the game anymore");
+		text2.setFont(Font.font("Courier", FontWeight.NORMAL, 14));
+
+		Button addAth = new Button("Add Athletes");
+		addAth.setTextFill(Color.BLUE);/* add button to stage(window) */
+		addAth.setFont(Font.font(20));
+		addAth.setOnAction(e -> {
+			try{
+				fullcheck.validate(competitors);
+				addAth.getScene().setRoot(chooseSprinter());
+			}catch(GameFullException a){
+				lab.setText("You cannot add more than 8 athletes in a game");
+			}
+		});
+
+		Button addOff = new Button("Add Official");
+		addOff.setTextFill(Color.BLUE);/* add button to stage(window) */
+		addOff.setFont(Font.font(20));
+		addOff.setOnAction(e -> addOff.getScene().setRoot(chooseOfficial()));
+
+		Button ret = new Button("Return to main menu");
+		ret.setTextFill(Color.RED);/* add button to stage(window) */
+		ret.setFont(Font.font(20));
+		ret.setOnAction(e -> {
+			gameList.add(newGame);
+			ret.getScene().setRoot(newGameDetails());
+		});
+
+		pane.add(text1, 3, 0);
+		pane.add(addAth, 3, 1);
+		pane.add(addOff, 3, 2);
+		pane.add(ret, 3, 3);
+		pane.add(text2, 3, 4);
+		pane.add(lab, 3, 6);
+
+		return pane;
+	}
+
+
+	/*---------------------------------------
+	 * --------------------------------------
+	 * ----- CHOOSE SPRINTER DISPLAY---------
+	 * --------------------------------------
+	 * --------------------------------------
+	 */
+	public GridPane chooseSprinter() {
+		GridPane pane = new GridPane();
+		pane.setPadding(new Insets(15.5, 10.5, 15.5, 45.5));
+		pane.setHgap(10);
+		pane.setVgap(5);
+		Text text1 = new Text(20, 20, "ATHLETE LIST");
+		text1.setFont(Font.font("Courier", FontWeight.BOLD, 25));
+		text1.setUnderline(true);
+		Text text2 = new Text(20, 20, "To add a sprinter/superathlete, enter his ID:");
+		text2.setFont(Font.font("Courier", FontWeight.NORMAL, 25));
+		Label lab = new Label();
+		lab.setTextFill(Color.RED);/* add button to stage(window) */
+		lab.setFont(Font.font(20));
+
+		TextField addAth = new TextField();
+		addAth.setFont(Font.font(20));
+		addAth.setOnAction(e -> {
+			String ID = addAth.getText();
+
+			/*
+			 * to check whether the athlete can be added to game and why.
+			 * returns to create game menu when finished
+			 */
+			int sprintError = ((RunningGame) newGame).chooseCompetitors(competitors, fullList, ID);
+			if (sprintError == -2) {
+				lab.setText("You cannot add the same athlete into a game");
+			} else if (sprintError == -1) {
+				lab.setText("The inputted ID does not exist");
+			} else if (sprintError == 0) {
+				lab.setText("You must choose sprinters or superathletes");
+			} else {
+				addAth.getScene().setRoot(runGameMenu());
+			}
+		});
+
+		/* listing out all athletes available */
+		pane.add(text1, 2, 0);
+		for (int i = 0; i < fullList.length; i++) {
+			Text atxt = new Text(athletesPoints(fullList[i]));
+			atxt.setFont(Font.font("Courier", FontWeight.NORMAL, 14));
+			pane.add(atxt, 2, i + 1);
+		}
+		pane.add(text2, 2, fullList.length + 4);
+		pane.add(addAth, 3, fullList.length + 4);
+		pane.add(lab, 2, fullList.length + 6);
+
+		return pane;
+	}
+
+	/*----------------------------------------------
+	 * ---------------------------------------------
+	 * ------------ CREATE CYCLING GAME MENU-------
+	 * ----------------------------------------------
+	 */
+
+	public GridPane cycleGameMenu() {
+		GridPane pane = new GridPane();
+		pane.setPadding(new Insets(15.5, 10.5, 15.5, 45.5));
+		pane.setHgap(10);
+		pane.setVgap(40);
+
+		Text text1 = new Text(20, 20, "CYCLING GAME MENU");
+		text1.setFont(Font.font("Courier", FontWeight.BOLD, 28));
+		text1.setUnderline(true);
+
+		Label lab = new Label();
+		lab.setTextFill(Color.RED);/* add button to stage(window) */
+		lab.setFont(Font.font(20));
+
+		Text text2 = new Text(20, 20,
+				"Note: Upon returning to main menu," + " you cannot add athletes or officials to the game anymore");
+		text2.setFont(Font.font("Courier", FontWeight.NORMAL, 14));
+
+		Button addAth = new Button("Add Athletes");
+		addAth.setTextFill(Color.BLUE);/* add button to stage(window) */
+		addAth.setFont(Font.font(20));
+		addAth.setOnAction(e -> {
+			try{
+				fullcheck.validate(competitors);
+				addAth.getScene().setRoot(chooseCyclists());
+			}catch(GameFullException a){
+				lab.setText("You cannot add more than 8 athletes in a game");
+			}
+		});
+
+		Button addOff = new Button("Add Official");
+		addOff.setTextFill(Color.BLUE);/* add button to stage(window) */
+		addOff.setFont(Font.font(20));
+		addOff.setOnAction(e -> addOff.getScene().setRoot(chooseOfficial()));
+
+		Button ret = new Button("Return to main menu");
+		ret.setTextFill(Color.RED);/* add button to stage(window) */
+		ret.setFont(Font.font(20));
+		ret.setOnAction(e -> {
+			gameList.add(newGame);
+			ret.getScene().setRoot(newGameDetails());
+		});
+		pane.add(text1, 3, 0);
+		pane.add(addAth, 3, 1);
+		pane.add(addOff, 3, 2);
+		pane.add(ret, 3, 3);
+		pane.add(text2, 3, 4);
+		pane.add(lab, 3, 6);
+
+		return pane;
+	}
+
+	/*---------------------------------------
+	 * --------------------------------------
+	 * ----- CHOOSE CYCLISTS DISPLAY---------
+	 * --------------------------------------
+	 * --------------------------------------
+	 */
+	public GridPane chooseCyclists() {
+
+		GridPane pane = new GridPane();
+		pane.setPadding(new Insets(15.5, 10.5, 15.5, 45.5));
+		pane.setHgap(10);
+		pane.setVgap(5);
+		Text text1 = new Text(20, 20, "ATHLETE LIST");
+		text1.setFont(Font.font("Courier", FontWeight.BOLD, 25));
+		text1.setUnderline(true);
+		Text text2 = new Text(20, 20, "To add a cyclist/superathlete, enter his ID:");
+		text2.setFont(Font.font("Courier", FontWeight.NORMAL, 25));
+		Label lab = new Label();
+		lab.setTextFill(Color.RED);/* add button to stage(window) */
+		lab.setFont(Font.font(20));
+
+		TextField addAth = new TextField();
+		addAth.setFont(Font.font(20));
+		addAth.setOnAction(e -> {
+			String ID = addAth.getText();
+
+			/*
+			 * to check whether the athlete can be added to game and why.
+			 * returns to create game menu when finished
+			 */
+			int cycleError = ((CyclingGame) newGame).chooseCompetitors(competitors, fullList, ID);
+			if (cycleError == -2) {
+				lab.setText("You cannot add the same athlete into a game");
+			} else if (cycleError == -1) {
+				lab.setText("The inputted ID does not exist");
+			} else if (cycleError == 0) {
+				lab.setText("You must choose cyclists or superathletes");
+			} else {
+				addAth.getScene().setRoot(cycleGameMenu());
+			}
+		});
+
+		/* listing out all athletes available */
+		pane.add(text1, 2, 0);
+		for (int i = 0; i < fullList.length; i++) {
+			Text atxt = new Text(athletesPoints(fullList[i]));
+			atxt.setFont(Font.font("Courier", FontWeight.NORMAL, 14));
+			pane.add(atxt, 2, i + 1);
+		}
+		pane.add(text2, 2, fullList.length + 4);
+		pane.add(addAth, 3, fullList.length + 4);
+		pane.add(lab, 2, fullList.length + 6);
+
+		return pane;
 	}
 
 	/*
-	 * choosing print method depending on type of participants in current game
-	 * prints out "No participant" if there is no participant in certain slots
+	 * =========================================================================
+	 * /* prints out all athletes details and their points depending on what
+	 * type
+	 * 
 	 */
-	public void displayCompetitors() {
-		System.out.println();
-		System.out.println("--- GAME PARTICIPANTS ---");
+	public String athletesPoints(Athletes ath) {
+		if (ath instanceof Swimmer) {
+			String data = ((Swimmer) ath).print();
+			return data;
+		} else if (ath instanceof Sprinters) {
+			String data = ((Sprinters) ath).print();
+			return data;
+		} else if (ath instanceof Cyclists) {
+			String data = ((Cyclists) ath).print();
+			return data;
+		} else if (ath instanceof Superathletes) {
+			String data = ((Superathletes) ath).print();
+			return data;
+		}
+
+		return null;
+	}
+
+	/*-------------------------------------
+	 * ------------------------------------
+	 * ----- CHOOSING OFFICIAL MENU--------
+	 * ------------------------------------
+	 */
+	public GridPane chooseOfficial() {
+		GridPane pane = new GridPane();
+		pane.setPadding(new Insets(15.5, 10.5, 15.5, 45.5));
+		pane.setHgap(10);
+		pane.setVgap(5);
+
+		Text text1 = new Text(20, 20, "OFFICIAL LIST");
+		text1.setFont(Font.font("Courier", FontWeight.BOLD, 25));
+		text1.setUnderline(true);
+
+		Text text2 = new Text(20, 20, "To add an official, enter his ID:");
+		text2.setFont(Font.font("Courier", FontWeight.NORMAL, 23));
+
+		Label lab = new Label();
+		lab.setTextFill(Color.RED);/* add button to stage(window) */
+		lab.setFont(Font.font(20));
+
+		TextField addOff = new TextField();
+		addOff.setFont(Font.font(20));
+		addOff.setOnAction(e -> {
+			String ID = addOff.getText();
+			officialchoice = chooseOfficial(ID);
+			if (officialchoice == null) {
+				lab.setText("The inputted ID does not exist");
+			} else {
+				newGame.setOfficial(officialchoice);
+				if (newGame instanceof SwimmingGame) {
+					addOff.getScene().setRoot(swimGameMenu());
+				} else if (newGame instanceof RunningGame) {
+					addOff.getScene().setRoot(runGameMenu());
+				} else {
+					addOff.getScene().setRoot(cycleGameMenu());
+				}
+
+			}
+		});
+
+		pane.add(text1, 2, 0);
+		for (int i = 0; i < officialList.length; i++) {
+			Text atxt = new Text(officialList[i].print());
+			atxt.setFont(Font.font("Courier", FontWeight.NORMAL, 14));
+			pane.add(atxt, 2, i + 1);
+		}
+
+		pane.add(text2, 2, officialList.length + 4);
+		pane.add(addOff, 3, officialList.length + 4);
+		pane.add(lab, 2, officialList.length + 5);
+
+		return pane;
+	}
+
+	/*----------------------------------------------------------
+	 * ---------------------------------------------------------
+	 * ---------- TO DISPLAY NEW GAME CREATED DETAILS ----------
+	 * ---------------------------------------------------------
+	 */
+	public GridPane newGameDetails() {
+		/* initializing the text and button for game details display */
+		GridPane pane = new GridPane();
+		pane.setPadding(new Insets(15.5, 10.5, 15.5, 45.5));
+		pane.setAlignment(Pos.CENTER);
+		pane.setHgap(30);
+		pane.setVgap(5);
+		Text gameText = new Text(20, 20, "CREATED GAME DETAILS");
+		gameText.setFont(Font.font("Courier", FontWeight.BOLD, 28));
+		gameText.setUnderline(true);
+		Text offText = new Text(20, 20, "OFFICIAL");
+		offText.setFont(Font.font("Courier", FontWeight.BOLD, 28));
+		offText.setUnderline(true);
+		Text athText = new Text(20, 20, "GAME PARTICIPANTS");
+		athText.setFont(Font.font("Courier", FontWeight.BOLD, 28));
+		athText.setUnderline(true);
+		Button ret = new Button("Return to Main Menu");
+		ret.setTextFill(Color.BLUE);/* add button to stage(window) */
+		ret.setFont(Font.font(15));
+		ret.setOnAction(e -> ret.getScene().setRoot(MainMenu()));
+
+		/* adding the text and button to display */
+		pane.add(gameText, 0, 0);
+		Text gtxt = new Text(newGame.showGame(newGame));
+		gtxt.setFont(Font.font("Courier", FontWeight.NORMAL, 20));
+		pane.add(gtxt, 0, 1);
+		pane.add(offText, 0, 4);
+
+		/* checks whether official has been chosen for game or not */
+		if (newGame.getOfficial() == null) {
+			Text otxt = new Text("No official in this game");
+			otxt.setFont(Font.font("Courier", FontWeight.NORMAL, 20));
+			pane.add(otxt, 0, 5);
+		} else {
+			Text otxt = new Text(newGame.getOfficial().print());
+			otxt.setFont(Font.font("Courier", FontWeight.NORMAL, 20));
+			pane.add(otxt, 0, 5);
+		}
+
+		/* prints competitors in game */
+		pane.add(athText, 0, 8);
 		for (int i = 0; i < competitors.length; i++) {
 			int count = i + 1;
-			if (competitors[i] instanceof Swimmer) {
-				System.out.printf("<" + count + "> ");
-				((Swimmer) competitors[i]).print();
-			} else if (competitors[i] instanceof Sprinters) {
-				System.out.printf("<" + count + "> ");
-				((Sprinters) competitors[i]).print();
-			} else if (competitors[i] instanceof Superathletes) {
-				System.out.printf("<" + count + "> ");
-				((Superathletes) competitors[i]).print();
-			} else if (competitors[i] instanceof Cyclists) {
-				System.out.printf("<" + count + "> ");
-				((Cyclists) competitors[i]).print();
+			if (competitors[i] != null) {
+				Text atxt = new Text("<" + count + ">" + athletesPoints(competitors[i]));
+				atxt.setFont(Font.font("Courier", FontWeight.NORMAL, 20));
+				pane.add(atxt, 0, i + 9);
 			} else {
-				System.out.printf("<" + count + "> ");
-				System.out.println("No participant");
+				Text atxt = new Text("<" + count + "> No participant");
+				atxt.setFont(Font.font("Courier", FontWeight.NORMAL, 20));
+				pane.add(atxt, 0, i + 9);
 			}
-
 		}
-		System.out.println();
+
+		pane.add(ret, 0, competitors.length + 16);
+		return pane;
+
 	}
 
-	/*
-	 * =========================================================================
-	 * ================ /* prints out participant list for current game and
-	 * prompts users to choose their winner
-	 * =========================================================================
-	 * =======
-	 */
-	public void predictMenu() {
-		Scanner scan = new Scanner(System.in);
+	/* choosing an official */
+	public Official chooseOfficial(String offID) {
 
-		do {
-			displayCompetitors();
-			System.out.println("Choose an option from 1-8 to predict your winner for" + " this game");
-			System.out.println("Press <9> to return to previous menu");
-
-			try {
-
-				String s = scan.nextLine();
-				int input = Integer.parseInt(s);
-
-				if (input > 0 && input < 9) {
-					if (competitors[input - 1] == null) {
-						System.out.println("There is no participant for that option. Please choose another option");
-					} else {
-						winpredict = competitors[input - 1].getName();
-						System.out.println("You have chosen " + competitors[input - 1].getName() + " as"
-								+ " your winner. Good Luck!!");
-						menu();
-					}
-				} else if (input == 9) {
-					System.out.println("Returning to previous menu...");
-					menu();
-				} else {
-					System.out.println("Please choose an option between 1-9");
-				}
-			} catch (Exception e) {
-				System.out.println("Please input a number");
+		int index = -1;
+		/* check if id inputted is in list of official */
+		for (int i = 0; i < officialList.length; i++) {
+			if (officialList[i].getID().equalsIgnoreCase(offID)) {
+				index = i;
+				break;
 			}
+		}
+		if (index == -1) {
+			return null;
+		} else {
+			Official off = officialList[index];
+			return off;
 
-		} while (true);
+		}
 
 	}
 
@@ -325,7 +794,8 @@ public class Driver {
 	 * =====================starting the game =================
 	 * ======================================
 	 */
-	public void startGame(Game theGame) {
+	public GridPane startGame(Game theGame) {
+
 		for (int i = 0; i < competitors.length; i++) {
 			if (competitors[i] != null) {
 				competitors[i].compete(theGame, competitors[i]);
@@ -333,40 +803,41 @@ public class Driver {
 		}
 		Official referee = theGame.getOfficial();
 		referee.summariseScore(competitors, theGame);
-		congratulations(theGame, winpredict);
+		db.updateResults(theGame, competitors);
+		db.writeGameResults(theGame, competitors);
 
-	}
+		/* initializing the text and button for game details display */
+		GridPane pane = new GridPane();
+		pane.setPadding(new Insets(15.5, 10.5, 15.5, 10.5));
+		pane.setAlignment(Pos.CENTER);
+		pane.setHgap(30);
+		pane.setVgap(5);
+		Text resultText = new Text(20, 20, "GAME RESULTS");
+		resultText.setFont(Font.font("Courier", FontWeight.BOLD, 28));
+		resultText.setUnderline(true);
 
-	/*
-	 * informs user whether they predicted the winner correctly or not
-	 * display a different message if a winner was not predicted
-	 */
-	public void congratulations(Game theGame, String predict) {
-		Athletes first = theGame.getWinner1();
-		Athletes second = theGame.getWinner2();
-		Athletes third = theGame.getWinner3();
-		System.out.println();
-		if (predict != null) {
-			System.out.println("You have predicted " + predict + " to be the winner.");
-			if (predict.equalsIgnoreCase(first.getName())) {
-				System.out.println(first.getName() + " is the first winner. Congratulations!!!");
-				System.out.println("You have predicted the first winner correctly!!");
-				System.out.println("CONGRATULATIONS...!!!");
-			} else if (predict.equalsIgnoreCase(second.getName())) {
-				System.out.println(second.getName() + " is the second winner.");
-				System.out.println("You have predicted the second winner correctly!!");
-				System.out.println("CONGRATULATIONS..!!");
-			} else if (predict.equalsIgnoreCase(third.getName())) {
-				System.out.println(third.getName() + " is the third winner.");
-				System.out.println("You have predicted the third winner correctly!!");
-				System.out.println("CONGRATULATIONS!");
-			} else {
-				System.out.println("You did not predict any of the winners correctly");
-				System.out.println("Better luck next time");
+		Button ret = new Button("Return to Main Menu");
+		ret.setTextFill(Color.BLUE);/* add button to stage(window) */
+		ret.setFont(Font.font(15));
+		ret.setOnAction(e -> ret.getScene().setRoot(MainMenu()));
+
+		/* adding the text and button to display */
+		pane.add(resultText, 0, 0);
+		Text gtxt = new Text(theGame.getOfficial().currentGamePrint(theGame));
+		gtxt.setFont(Font.font("Courier", FontWeight.NORMAL, 25));
+		pane.add(gtxt, 0, 1);
+
+		for (int i = 0; i < competitors.length; i++) {
+			if (competitors[i] != null) {
+				String s = theGame.getOfficial().printResults(competitors[i], theGame);
+				Text rst = new Text(s);
+				rst.setFont(Font.font("Courier", FontWeight.NORMAL, 20));
+				pane.add(rst, 0, i + 2);
 			}
-		} else {
-			System.out.println("You did not choose to predict a winner...");
 		}
+
+		pane.add(ret, 0, competitors.length + 16);
+		return pane;
 
 	}
 
@@ -375,43 +846,91 @@ public class Driver {
 	 * printing out all games details and their winners depending on what type
 	 * =======================================================================
 	 */
-	public void gameResults() {
+	public GridPane gameResults() {
 		Iterator reader = gameList.iterator();
-		System.out.println();
-		System.out.println("==== GAME LIST =====");
+
+		/* initializing the text and button for game details display */
+		GridPane pane = new GridPane();
+		pane.setPadding(new Insets(15.5, 10.5, 15.5, 10.5));
+		pane.setAlignment(Pos.TOP_LEFT);
+		pane.setHgap(30);
+		pane.setVgap(1);
+		Text resultText = new Text(20, 20, "FINISHED GAMES RESULTS");
+		resultText.setFont(Font.font("Courier", FontWeight.BOLD, 28));
+		resultText.setUnderline(true);
+
+		Button ret = new Button("Return to Main Menu");
+		ret.setTextFill(Color.BLUE);/* add button to stage(window) */
+		ret.setFont(Font.font(15));
+		ret.setOnAction(e -> ret.getScene().setRoot(MainMenu()));
+
+		/* adding the text and button to display */
+		pane.add(resultText, 1, 0);
+
+		int count = 1;
 		while (reader.hasNext()) {
 			Game theGame = (Game) reader.next();
-			if (theGame instanceof SwimmingGame) {
-				((SwimmingGame) theGame).printResults();
-			} else if (theGame instanceof RunningGame) {
-				((RunningGame) theGame).printResults();
-			} else {
-				((CyclingGame) theGame).printResults();
+			String s = gameCheck(theGame);
+			if (s != null) {
+				Text rst = new Text(s);
+				rst.setFont(Font.font("Courier", FontWeight.NORMAL, 13));
+				pane.add(rst, 1, count);
+				count++;
 			}
 		}
-	}
-	/*
-	 * =========================================================================
-	 * /* prints out all athletes details and their points depending on what
-	 * type
-	 * ========================================================================
-	 */
 
-	public void athletesPoints() {
-		System.out.println();
-		System.out.println("--- ATHLETES POINTS ---");
-		for (int i = 0; i < swimList.length; i++) {
-			swimList[i].printPoints();
-		}
-		for (int i = 0; i < sprinterList.length; i++) {
-			sprinterList[i].printPoints();
-		}
-		for (int i = 0; i < cyclistList.length; i++) {
-			cyclistList[i].printPoints();
-		}
-		for (int i = 0; i < superList.length; i++) {
-			superList[i].printPoints();
-		}
-		System.out.println();
+		pane.add(ret, 0, 0);
+		return pane;
 	}
+
+	public String gameCheck(Game theGame) {
+
+		if (theGame instanceof SwimmingGame) {
+			String data = ((SwimmingGame) theGame).printResults();
+			return data;
+		} else if (theGame instanceof RunningGame) {
+			String data = ((RunningGame) theGame).printResults();
+			return data;
+		} else {
+			String data = ((CyclingGame) theGame).printResults();
+			return data;
+		}
+
+	}
+
+	/*----------------------------------------------------------
+	 * ---------------------------------------------------------
+	 * ---------- TO DISPLAY ATHLETE POINTS ----------
+	 * ---------------------------------------------------------
+	 */
+	public GridPane athleteList() {
+		/* initializing the text and button for game details display */
+		GridPane pane = new GridPane();
+		pane.setPadding(new Insets(15.5, 10.5, 15.5, 45.5));
+		pane.setAlignment(Pos.TOP_LEFT);
+		pane.setHgap(30);
+		pane.setVgap(2);
+		Text gameText = new Text(20, 20, "ATHLETE POINTS");
+		gameText.setFont(Font.font("Courier", FontWeight.BOLD, 28));
+		gameText.setUnderline(true);
+		Button ret = new Button("Return to Main Menu");
+		ret.setTextFill(Color.BLUE);/* add button to stage(window) */
+		ret.setFont(Font.font(15));
+		ret.setOnAction(e -> ret.getScene().setRoot(MainMenu()));
+
+		/* adding the text and button to display */
+		pane.add(gameText, 1, 0);
+		for (int i = 0; i < fullList.length; i++) {
+			if (fullList[i] != null) {
+				Text atxt = new Text(athletesPoints(fullList[i]));
+				atxt.setFont(Font.font("Courier", FontWeight.NORMAL, 15));
+				pane.add(atxt, 1, i + 1);
+			}
+		}
+
+		pane.add(ret, 0, 0);
+		return pane;
+
+	}
+
 }

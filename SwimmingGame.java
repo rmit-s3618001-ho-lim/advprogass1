@@ -1,9 +1,13 @@
-// author: Cherng Ho Lim s3618001
+import Exception.SameAthleteException;
+import Exception.WrongTypeException;
 
+public class SwimmingGame extends Game{
+	
+	WrongSwimGame wrong = new WrongSwimGame() {
+	};
 
-import java.util.Random;
-
-public class SwimmingGame extends Game {
+	SameAth same = new SameAth() {
+	};
 
 	// constructors for swimming game//
 	public SwimmingGame(String ID, Official off) {
@@ -30,73 +34,62 @@ public class SwimmingGame extends Game {
 	// randomly choosing swimmers or superathletes from respective array to
 	// participate in current game
 	// also ensure that the same athlete is not added to current game
-	public void chooseCompetitors(Athletes[] competitors, Swimmer[] swimmers, Superathletes[] supers, int number) {
-		Random rng = new Random();
-		Swimmer swim = null;
-		Superathletes supere = null;
-		int count = 0;
-		do {
-			boolean sameguy = false;
-			int athleteschoice = rng.nextInt(2);
-			// randomly choosing a swimmer
-			if (athleteschoice == 0) {
-				swim = swimmers[rng.nextInt(swimmers.length)];
-				if (competitors[0] == null) {
-					competitors[0] = swim;
-					count++;
-				} else {
-					for (int j = 0; j < count; j++) {
-						if (swim.getID().equalsIgnoreCase(competitors[j].getID())) {
-							sameguy = true;
-						}
-					}
-					if (sameguy == true) {
-						continue;
-					} else {
-						competitors[count] = swim;
-						count++;
-					}
+	/** METHOD MODIFIED FOR ASSIGNMENT 2 **/
+	public int chooseCompetitors(Athletes[] competitors, Athletes[] theList, String ID) {
+		try {
+			int count = competitors.length;
 
-				}
-				// randomly choosing a superathlete
-			} else {
-				supere = supers[rng.nextInt(supers.length)];
-				if (competitors[0] == null) {
-					competitors[0] = supere;
-					count++;
-				} else {
-					for (int j = 0; j < count; j++) {
-						if (supere.getID().equalsIgnoreCase(competitors[j].getID())) {
-							sameguy = true;
-						}
-					}
-					if (sameguy == true) {
-						continue;
-					} else {
-						competitors[count] = supere;
-						count++;
-					}
+			for (int i = 0; i < competitors.length; i++) {
+				if (competitors[i] == null) {
+					count--;
 				}
 			}
-		} while (count < number);
 
+			same.validate(competitors, ID, count);
+
+			int index = -1;
+			/* check if id inputted is in list of athletes */
+			for (int i = 0; i < theList.length; i++) {
+				if (theList[i].getID().equalsIgnoreCase(ID)) {
+					index = i;
+					break;
+				}
+			}
+			if (index == -1) {
+				return -1;
+			} else {
+
+				Athletes ath = theList[index];
+				wrong.validate(ath);
+				for (int i = 0; i < competitors.length; i++) {
+					if (competitors[i] == null) {
+						competitors[count] = ath;
+						break;
+					}
+				}
+
+			}
+
+			return 1;
+		} catch (WrongTypeException e) {
+			return 0;
+		} catch (SameAthleteException e) {
+			return -2;
+		}
 	}
 
+
 	// print out current game details
-	public void print() {
+	public String print() {
 		String gameID = getGameID();
-		Official off = getOfficial();
-		System.out.println("--- GAME DETAILS ---");
-		System.out.printf("ID: " + gameID);
-		System.out.printf("   Type:  Swimming Game");
-		System.out.println();
-		off.print();
+		String data = "ID: " + gameID+ "      Type:  Swimming Game";
+		return data;
 	}
 
 	// prints out swimming game details including their winners
 	// prints out different message if the game was either cancelled or never
 	// started
-	public void printResults() {
+	public String printResults() {
 		String gameID = getGameID();
 		Official off = getOfficial();
 		String type = "Swimming";
@@ -104,17 +97,13 @@ public class SwimmingGame extends Game {
 		Athletes win2 = getWinner2();
 		Athletes win3 = getWinner3();
 		if (win1 != null && win2 != null && win3 != null) {
-			System.out.print(String.format(
-					"Game ID: %-2s Type: %-9s Official: %-18s Winner 1: %-12s Winner 2: %-12s" + "Winner 3: %s", gameID,
-					type, off.getName(), win1.getName(), win2.getName(), win3.getName()));
-			System.out.println();
-		} else {
-			System.out.print(
-					String.format("Game ID: %-2s Type: %-9s Official: %-20s (This game was cancelled or not started)",
-							gameID, type, off.getName()));
-			System.out.println();
+			String data = String.format(
+					"Game ID: %-5s \t Type: %-10s \t Official: %-35s \t Winner 1: %-30s \t"
+					+ " Winner 2: %-30s \t Winner 3: %s", gameID,
+					type, off.getName(), win1.getName(), win2.getName(), win3.getName());
+			return data;
 		}
+		return null;
 	}
-
 
 }

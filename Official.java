@@ -1,36 +1,29 @@
-//author : Zhipeng Li s3581721
-
+import java.util.Arrays;
+import java.util.Comparator;
 
 public class Official extends Participant {
 
 	/* official constructors */
-	public Official(String IDs, String names, int ages, String states) {
+	public Official(String IDs, String types, String names, int ages, String states) {
 		super.ID = IDs;
 		super.name = names;
 		super.age = ages;
 		super.state = states;
+		super.type = types;
 	}
 
 	public Official() {
 	}
 
-	/* method to load all officials into an array */
-	public void loadOfficials(Official[] officialList) {
-		officialList[0] = new Official("OF01", "Jimmy Firecracker", 34, "Victoria");
-		officialList[1] = new Official("OF02", "John Smith", 50, "W. Australia");
-		officialList[2] = new Official("OF03", "Chicken McTasty", 23, "Tasmania");
-	}
 
 	/* print out the official in current game details */
-	public void print() {
+	public String print() {
 		String offID = getID();
 		String offName = getName();
 		int offAge = getAge();
 		String offState = getState();
-		System.out.println();
-		System.out.println("--- OFFICIAL DETAILS ---");
-		System.out.print(String.format("ID: %-5s Name: %-15s Age: %-5s State: %s", offID, offName, offAge, offState));
-		System.out.println();
+		String data = String.format("ID: %-15s \t Name: %-35s \t Age: %-15s \t State: %s", offID, offName, offAge, offState);
+		return data;
 	}
 
 	/*
@@ -54,8 +47,6 @@ public class Official extends Participant {
 			}
 		}
 		gam.setWinner1(winner1);
-		System.out.println(
-				"The first winner of this game is " + winner1.getName() + " with a race time of " + min + " seconds");
 		winner1.setPoints(5);
 
 		/* choosing the second winner and giving him his points */
@@ -71,8 +62,6 @@ public class Official extends Participant {
 			}
 		}
 		gam.setWinner2(winner2);
-		System.out.println(
-				"The second winner of this game is " + winner2.getName() + " with a race time of " + min + " seconds");
 		winner2.setPoints(3);
 
 		/* choosing the last winner and giving him his points */
@@ -88,10 +77,63 @@ public class Official extends Participant {
 			}
 		}
 		gam.setWinner3(winner3);
-		System.out.println(
-				"The third winner of this game is " + winner3.getName() + " with a race time of " + min + " seconds");
-		winner3.setPoints(1);
-
+		winner3.setPoints(1);	
+		
+		sortCompetitors(competitors);
 	}
+	
+	public String currentGamePrint(Game gam){
+		String data = String.format("Game ID: %-25s \t Official: %s ", gam.getGameID(), gam.getOfficial().getName());
+		return data;
+	}
+	
+	public void sortCompetitors(Athletes[] competitors){
+		/*sorting the competitors according to their time */
+		Arrays.sort(competitors, new Comparator<Athletes>(){
+			public int compare(Athletes ath1, Athletes ath2) {
+				if (ath1 == null && ath2 == null) {
+	                return 0;
+	            }
+	            if (ath1 == null) {
+	                return 1;
+	            }
+	            if (ath2 == null) {
+	                return -1;
+	            }
+	            return ath1.compareTo(ath2);
+			}});
+	}
+	
+	public String printResults(Athletes competitor, Game gam){
+		/*printing out game results */
+		Athletes winner1 = gam.getWinner1();
+		Athletes winner2 = gam.getWinner2();
+		Athletes winner3 = gam.getWinner3();
+		
+				if(competitor == winner1){
+					String data = (String.format(
+							"ID: %-15s \t Name: %-25s \t Time: %-4d seconds \t Points earned: 5", competitor.getID(),
+							competitor.getName(), competitor.getTime()));
+					return data;
+				}else if(competitor == winner2){
+					String data = (String.format(
+							"ID: %-15s \t Name: %-25s \t Time: %-4d seconds \t Points earned: 3", competitor.getID(),
+							competitor.getName(), competitor.getTime()));
+					return data;
+				}else if(competitor == winner3){
+					String data = (String.format(
+							"ID: %-15s \t Name: %-25s \t Time: %-4d seconds \t Points earned: 1", competitor.getID(),
+							competitor.getName(), competitor.getTime()));
+					return data;
+				}
+					String data = (String.format(
+							"ID: %-15s \t Name: %-25s \t Time: %-4d seconds \t Points earned: 0", competitor.getID(),
+							competitor.getName(), competitor.getTime()));
+					return data;
+				
+				
+			}
+		   
+		
 
 }

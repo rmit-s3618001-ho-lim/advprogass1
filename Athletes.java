@@ -1,17 +1,16 @@
-//author : Zhipeng Li s3581721
 
-
-public abstract class Athletes extends Participant {
+public abstract class Athletes extends Participant implements Comparable<Athletes> {
 
 	private int points;
 	private int time;
 
 	/* athletes constructors */
-	public Athletes(String IDs, String names, int ages, String states) {
+	public Athletes(String IDs, String type, String names, int ages, String states) {
 		super.ID = IDs;
 		super.name = names;
 		super.age = ages;
 		super.state = states;
+		super.type = type;
 		points = 0;
 		time = 0;
 	}
@@ -38,6 +37,16 @@ public abstract class Athletes extends Participant {
 
 	public abstract void compete(Game gam, Athletes ath);
 
-	public abstract void print();
+	public abstract String print();
+
+	public int compareTo(Athletes ath) {
+		int compareTime = ((Athletes) ath).getTime();
+
+		//ascending order
+		return this.time - compareTime;
+		
+	}
+
+
 
 }

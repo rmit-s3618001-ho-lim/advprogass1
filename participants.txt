@@ -1,0 +1,29 @@
+SW01, Swimmer, Bob, 34, VIC
+SW02, Swimmer, Terry, 50, ACT
+CY03, Cyclists, Bruce, 60, TAS
+U R A SPY
+, Swimmer, Lim, 32, VIC
+SW05, Swimmer, Lim, 32, VIC
+SW03, Swimmer, James, 60, NT
+SW03, Swimmer, James, 60, NT
+SP01, Sprinters, Michael, 34, SA
+CY01, Cyclists, Wayne, 34, VIC
+SW04, Swimmer, Lee, 29, QLD
+SW04, Swimmer, Lee, QLD
+SP03, Sprinters, Tom, 40, ACT
+CY02, Cyclists, Woody, 50, QLD
+SP02, Sprinters, Justin, 50, TAS
+CY04, Cyclists, Lang, 19, VIC
+CY05, Cyclists, Chris, 22, NSW
+SP04, Sprinters, Jerry, 19, WA
+SP05, Sprinters, Bolt, 12, QLD
+SU01, Super, SuperJohn, 34, VIC
+SU02, Super, SuperBob, 50, NSW
+SU03, Super, SuperJim, 60, VIC
+OF01, Official, Jimmy Firecracker, 34, VIC
+OF02, Official, John Smith, 50, WA
+OF03, Official, Chicken McTasty, 23, TAS
+SP06, Sprinters, Little Green, 2, VIC
+OF07, Official,, 54, TAS
+OF04, Official, Ducky McCrispy, 54, TAS
+OF05, Official, Ducky McCrispy, 54,
