@@ -1,4 +1,4 @@
-
+// author: Cherng Ho Lim s3618001
 public abstract class Athletes extends Participant implements Comparable<Athletes> {
 
 	private int points;
@@ -35,6 +35,7 @@ public abstract class Athletes extends Participant implements Comparable<Athlete
 		this.time = timeCom;
 	}
 
+	/* abstract methods */
 	public abstract void compete(Game gam, Athletes ath);
 
 	public abstract String print();
@@ -42,11 +43,9 @@ public abstract class Athletes extends Participant implements Comparable<Athlete
 	public int compareTo(Athletes ath) {
 		int compareTime = ((Athletes) ath).getTime();
 
-		//ascending order
+		// ascending order
 		return this.time - compareTime;
-		
+
 	}
-
-
 
 }

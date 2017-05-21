@@ -1,5 +1,7 @@
-
+// author: Cherng Ho Lim s3618001
 public class CyclingGame extends Game {
+	
+	// custom exception class objects
 
 	WrongCycleGame wrong = new WrongCycleGame() {
 	};
@@ -29,23 +31,24 @@ public class CyclingGame extends Game {
 
 	}
 
-	// randomly choosing cyclists or superathletes from respective array to
-	// participate in current game
-	// also ensure that the same athlete is not added to current game
+	// checks if athlete chosen can be added to game
 	public int chooseCompetitors(Athletes[] competitors, Athletes[] theList, String ID) {
 		try {
+			//count the current number of competitors in game
 			int count = competitors.length;
 
 			for (int i = 0; i < competitors.length; i++) {
+				
 				if (competitors[i] == null) {
 					count--;
 				}
 			}
 
+			//check whether athlete chosen is already in game
 			same.validate(competitors, ID, count);
 
+			// check if id inputted is in list of athletes */
 			int index = -1;
-			/* check if id inputted is in list of athletes */
 			for (int i = 0; i < theList.length; i++) {
 				if (theList[i].getID().equalsIgnoreCase(ID)) {
 					index = i;
@@ -55,7 +58,6 @@ public class CyclingGame extends Game {
 			if (index == -1) {
 				return -1;
 			} else {
-
 				Athletes ath = theList[index];
 				wrong.validate(ath);
 				for (int i = 0; i < competitors.length; i++) {
@@ -64,9 +66,7 @@ public class CyclingGame extends Game {
 						break;
 					}
 				}
-
 			}
-
 			return 1;
 		} catch (WrongTypeException e) {
 			return 0;
@@ -75,16 +75,14 @@ public class CyclingGame extends Game {
 		}
 	}
 
-	// print out current game details
+	// returns current game details for printing
 	public String print() {
 		String gameID = getGameID();
 		String data = "ID: " + gameID + "      Type:  Cycling Game";
 		return data;
 	}
 
-	// prints out swimming game details including their winners
-	// prints out different message if the game was either cancelled or never
-	// started
+	// returns cycling game details including their winners for printing
 	public String printResults() {
 		String gameID = getGameID();
 		Official off = getOfficial();

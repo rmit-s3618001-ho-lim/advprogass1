@@ -1,4 +1,4 @@
-
+// author: Cherng Ho Lim s3618001
 
 public abstract class Participant {
 
@@ -51,6 +51,6 @@ public abstract class Participant {
 		this.state = state;
 	}
 	
-	/*added type */
+	
 
 }

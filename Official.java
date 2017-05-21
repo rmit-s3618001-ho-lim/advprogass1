@@ -1,3 +1,5 @@
+// author: Cherng Ho Lim s3618001
+
 import java.util.Arrays;
 import java.util.Comparator;
 
@@ -82,6 +84,7 @@ public class Official extends Participant {
 		sortCompetitors(competitors);
 	}
 	
+	/*printing details of current game */
 	public String currentGamePrint(Game gam){
 		String data = String.format("Game ID: %-25s \t Official: %s ", gam.getGameID(), gam.getOfficial().getName());
 		return data;
@@ -105,7 +108,7 @@ public class Official extends Participant {
 	}
 	
 	public String printResults(Athletes competitor, Game gam){
-		/*printing out game results */
+		/*return string for printing game results */
 		Athletes winner1 = gam.getWinner1();
 		Athletes winner2 = gam.getWinner2();
 		Athletes winner3 = gam.getWinner3();

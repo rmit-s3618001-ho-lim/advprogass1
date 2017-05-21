@@ -1,3 +1,5 @@
+// author: Cherng Ho Lim s3618001
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import javafx.application.Application;
@@ -16,6 +18,7 @@ import javafx.stage.Stage;
 
 public class Driver extends Application {
 
+	public Driver (){};
 	/*
 	 * variables used for keeping track of number of games created also used for
 	 * making new ID for games
@@ -33,13 +36,13 @@ public class Driver extends Application {
 
 	Official officialchoice;
 	Game newGame = new Game();
-	
+
+	/* exceptions object */
 	NotEnoughAthletes check = new NotEnoughAthletes();
 	NoReferee refcheck = new NoReferee();
 	gameExist gamecheck = new gameExist();
 	gameRunOnce runcheck = new gameRunOnce();
 	gameFull fullcheck = new gameFull();
-
 
 	ArrayList<Swimmer> fullSwim = new ArrayList<Swimmer>();
 	ArrayList<Sprinters> fullSprint = new ArrayList<Sprinters>();
@@ -81,8 +84,8 @@ public class Driver extends Application {
 		}
 
 		/*
-		 * load in the official, swimmer, sprinters, cyclists and superathletes
-		 * before showing the main menu
+		 * convert arraylist to arrays and create an array filled with all
+		 * athletes
 		 */
 		officialList = fullOff.toArray(new Official[fullOff.size()]);
 
@@ -135,17 +138,21 @@ public class Driver extends Application {
 
 		/** Button to create a new game **/
 		Button create = new Button("Create a game to run");
-		create.setTextFill(Color.BLUE);/* add button to stage(window) */
-		create.setFont(Font.font(20)); /* set color and font size */
+		create.setTextFill(Color.BLUE);
+		create.setFont(Font.font(20)); 
 		create.setOnAction(a -> create.getScene().setRoot(createGameMenu()));
 
 		/** Button to start the game **/
 		Button gameStart = new Button("Start the game");
-		gameStart.setTextFill(Color.BLUE);/* add button to stage(window) */
+		gameStart.setTextFill(Color.BLUE);
 		gameStart.setFont(Font.font(20));
 		gameStart.setOnAction(b -> {
 
-			try {
+			try {/*
+					 * before starting game, check whether game exists,
+					 * participants >3, has not been run yet and has referee.
+					 * throws exception if fails any of these
+					 */
 				gamecheck.validate(gameList);
 				check.validate(competitors);
 				Game gam = gameList.get((gameList.size() - 1));
@@ -165,13 +172,13 @@ public class Driver extends Application {
 			}
 		});
 
+		/** Button to see details of all finished games **/
 		Button gameResults = new Button("Display results of finished games");
 		gameResults.setTextFill(Color.BLUE);
 		gameResults.setFont(Font.font(20));
-		gameResults.setOnAction(c -> gameResults.getScene().setRoot(
+		gameResults.setOnAction(c -> gameResults.getScene().setRoot(gameResults()));
 
-				gameResults()));
-
+		/** Button to see details of all athletes **/
 		Button athPoints = new Button("Display all athletes points");
 		athPoints.setTextFill(Color.BLUE);
 		athPoints.setFont(Font.font(20));
@@ -197,8 +204,8 @@ public class Driver extends Application {
 		return pane;
 	}
 
+	/**************************** CREATING NEW GAME *****************************************************/
 	
-
 	/*----------------------------------------------
 	 * ----------------------------------------------
 	 * ---------- CREATE GAME MENU------------------
@@ -211,17 +218,19 @@ public class Driver extends Application {
 		pane.setPadding(new Insets(15.5, 10.5, 15.5, 45.5));
 		pane.setVgap(40);
 
-		Text text1 = new Text(20, 20, "GAME MENU");
+		Text text1 = new Text(20, 20, "OZLYMPIC GAME MENU");
 		text1.setFont(Font.font("Courier", FontWeight.BOLD, 30));
 		text1.setUnderline(true);
 
 		Text text2 = new Text(20, 20, "Note: Selecting a new game will cancel/finish the previous game");
 		text2.setFont(Font.font("Courier", FontWeight.NORMAL, 14));
 
+		/*Button to create swimming game */
 		Button swimGame = new Button("Create swimming game");
-		swimGame.setTextFill(Color.BLUE);/* add button to stage(window) */
+		swimGame.setTextFill(Color.BLUE);
 		swimGame.setFont(Font.font(20));
 
+		//resets competitors, creates new ID and reset official choice 
 		swimGame.setOnAction(a -> {
 			competitors = new Athletes[competitors.length];
 			SwimmingGame swim = new SwimmingGame();
@@ -232,8 +241,9 @@ public class Driver extends Application {
 			swimGame.getScene().setRoot(swimGameMenu());
 		});
 
+		/*Button to create running game */
 		Button runGame = new Button("Create running game");
-		runGame.setTextFill(Color.BLUE);/* add button to stage(window) */
+		runGame.setTextFill(Color.BLUE);
 		runGame.setFont(Font.font(20));
 		runGame.setOnAction(a -> {
 			competitors = new Athletes[competitors.length];
@@ -245,21 +255,23 @@ public class Driver extends Application {
 			runGame.getScene().setRoot(runGameMenu());
 		});
 
+		/*Button to create cycling game */
 		Button cycGame = new Button("Create cycling game");
-		cycGame.setTextFill(Color.BLUE);/* add button to stage(window) */
+		cycGame.setTextFill(Color.BLUE);
 		cycGame.setFont(Font.font(20));
 		cycGame.setOnAction(a -> {
 			competitors = new Athletes[competitors.length];
 			CyclingGame cyc = new CyclingGame();
-			String cycID = cyc.IDMaker(runcount);
+			String cycID = cyc.IDMaker(cyclecount);
 			newGame = new CyclingGame(cycID, null);
 			officialchoice = null;
 			cyclecount++;
 			cycGame.getScene().setRoot(cycleGameMenu());
 		});
 
+		/*Button to return to main menu */
 		Button ret = new Button("Return to previous menu");
-		ret.setTextFill(Color.RED);/* add button to stage(window) */
+		ret.setTextFill(Color.RED);
 		ret.setFont(Font.font(20));
 		ret.setOnAction(e -> ret.getScene().setRoot(MainMenu()));
 
@@ -292,30 +304,34 @@ public class Driver extends Application {
 		text1.setUnderline(true);
 
 		Label lab = new Label();
-		lab.setTextFill(Color.RED);/* add button to stage(window) */
+		lab.setTextFill(Color.RED);
 		lab.setFont(Font.font(20));
 
 		Text text2 = new Text(20, 20,
 				"Note: Upon returning to main menu," + " you cannot add athletes or officials to the game anymore");
 		text2.setFont(Font.font("Courier", FontWeight.NORMAL, 14));
 
+		/*Button to add athletes*/
 		Button addAth = new Button("Add Athletes");
-		addAth.setTextFill(Color.BLUE);/* add button to stage(window) */
+		addAth.setTextFill(Color.BLUE);
 		addAth.setFont(Font.font(20));
 		addAth.setOnAction(e -> {
-			try{
+			try {
+				/*check whether there are already 8 athletes in game */
 				fullcheck.validate(competitors);
 				addAth.getScene().setRoot(chooseSwimmer());
-			}catch(GameFullException a){
+			} catch (GameFullException a) {
 				lab.setText("You cannot add more than 8 athletes in a game");
 			}
 		});
 
+		/* Button to choice an official */
 		Button addOff = new Button("Add Official");
 		addOff.setTextFill(Color.BLUE);/* add button to stage(window) */
 		addOff.setFont(Font.font(20));
 		addOff.setOnAction(e -> addOff.getScene().setRoot(chooseOfficial()));
 
+		/* Button to return to main menu. Cannot add any more athletes or official after this */
 		Button ret = new Button("Return to main menu");
 		ret.setTextFill(Color.RED);/* add button to stage(window) */
 		ret.setFont(Font.font(20));
@@ -390,6 +406,7 @@ public class Driver extends Application {
 		return pane;
 	}
 
+	
 	/*------------------------------------------------------------
 	 * -----------------------------------------------------------
 	 * ---------------- CREATE RUNNING GAME MENU -----------------
@@ -407,32 +424,35 @@ public class Driver extends Application {
 		text1.setUnderline(true);
 
 		Label lab = new Label();
-		lab.setTextFill(Color.RED);/* add button to stage(window) */
+		lab.setTextFill(Color.RED);
 		lab.setFont(Font.font(20));
 
 		Text text2 = new Text(20, 20,
 				"Note: Upon returning to main menu," + " you cannot add athletes or officials to the game anymore");
 		text2.setFont(Font.font("Courier", FontWeight.NORMAL, 14));
 
+		/*Button to add athletes*/
 		Button addAth = new Button("Add Athletes");
-		addAth.setTextFill(Color.BLUE);/* add button to stage(window) */
+		addAth.setTextFill(Color.BLUE);
 		addAth.setFont(Font.font(20));
 		addAth.setOnAction(e -> {
-			try{
+			try {
 				fullcheck.validate(competitors);
 				addAth.getScene().setRoot(chooseSprinter());
-			}catch(GameFullException a){
+			} catch (GameFullException a) {
 				lab.setText("You cannot add more than 8 athletes in a game");
 			}
 		});
 
+		/*Button to choose official*/
 		Button addOff = new Button("Add Official");
-		addOff.setTextFill(Color.BLUE);/* add button to stage(window) */
+		addOff.setTextFill(Color.BLUE);
 		addOff.setFont(Font.font(20));
 		addOff.setOnAction(e -> addOff.getScene().setRoot(chooseOfficial()));
 
+		/* Button to return to main menu. Cannot add any more athletes or official after this */
 		Button ret = new Button("Return to main menu");
-		ret.setTextFill(Color.RED);/* add button to stage(window) */
+		ret.setTextFill(Color.RED);
 		ret.setFont(Font.font(20));
 		ret.setOnAction(e -> {
 			gameList.add(newGame);
@@ -448,7 +468,6 @@ public class Driver extends Application {
 
 		return pane;
 	}
-
 
 	/*---------------------------------------
 	 * --------------------------------------
@@ -467,7 +486,7 @@ public class Driver extends Application {
 		Text text2 = new Text(20, 20, "To add a sprinter/superathlete, enter his ID:");
 		text2.setFont(Font.font("Courier", FontWeight.NORMAL, 25));
 		Label lab = new Label();
-		lab.setTextFill(Color.RED);/* add button to stage(window) */
+		lab.setTextFill(Color.RED);
 		lab.setFont(Font.font(20));
 
 		TextField addAth = new TextField();
@@ -522,32 +541,35 @@ public class Driver extends Application {
 		text1.setUnderline(true);
 
 		Label lab = new Label();
-		lab.setTextFill(Color.RED);/* add button to stage(window) */
+		lab.setTextFill(Color.RED);
 		lab.setFont(Font.font(20));
 
 		Text text2 = new Text(20, 20,
 				"Note: Upon returning to main menu," + " you cannot add athletes or officials to the game anymore");
 		text2.setFont(Font.font("Courier", FontWeight.NORMAL, 14));
 
+		/* Button to add athletes */
 		Button addAth = new Button("Add Athletes");
-		addAth.setTextFill(Color.BLUE);/* add button to stage(window) */
+		addAth.setTextFill(Color.BLUE);
 		addAth.setFont(Font.font(20));
 		addAth.setOnAction(e -> {
-			try{
+			try {
 				fullcheck.validate(competitors);
 				addAth.getScene().setRoot(chooseCyclists());
-			}catch(GameFullException a){
+			} catch (GameFullException a) {
 				lab.setText("You cannot add more than 8 athletes in a game");
 			}
 		});
 
+		/* Button to choose officials*/
 		Button addOff = new Button("Add Official");
-		addOff.setTextFill(Color.BLUE);/* add button to stage(window) */
+		addOff.setTextFill(Color.BLUE);
 		addOff.setFont(Font.font(20));
 		addOff.setOnAction(e -> addOff.getScene().setRoot(chooseOfficial()));
 
+		/* Button to return to main menu. Cannot add any more athletes or official after this */
 		Button ret = new Button("Return to main menu");
-		ret.setTextFill(Color.RED);/* add button to stage(window) */
+		ret.setTextFill(Color.RED);
 		ret.setFont(Font.font(20));
 		ret.setOnAction(e -> {
 			gameList.add(newGame);
@@ -581,7 +603,7 @@ public class Driver extends Application {
 		Text text2 = new Text(20, 20, "To add a cyclist/superathlete, enter his ID:");
 		text2.setFont(Font.font("Courier", FontWeight.NORMAL, 25));
 		Label lab = new Label();
-		lab.setTextFill(Color.RED);/* add button to stage(window) */
+		lab.setTextFill(Color.RED);
 		lab.setFont(Font.font(20));
 
 		TextField addAth = new TextField();
@@ -621,8 +643,7 @@ public class Driver extends Application {
 
 	/*
 	 * =========================================================================
-	 * /* prints out all athletes details and their points depending on what
-	 * type
+	 * decides which print method to use depending on athletes type
 	 * 
 	 */
 	public String athletesPoints(Athletes ath) {
@@ -662,7 +683,7 @@ public class Driver extends Application {
 		text2.setFont(Font.font("Courier", FontWeight.NORMAL, 23));
 
 		Label lab = new Label();
-		lab.setTextFill(Color.RED);/* add button to stage(window) */
+		lab.setTextFill(Color.RED);
 		lab.setFont(Font.font(20));
 
 		TextField addOff = new TextField();
@@ -670,6 +691,8 @@ public class Driver extends Application {
 		addOff.setOnAction(e -> {
 			String ID = addOff.getText();
 			officialchoice = chooseOfficial(ID);
+			//checks whether text inputted matches official ID
+			//returns to create game menu after finish adding
 			if (officialchoice == null) {
 				lab.setText("The inputted ID does not exist");
 			} else {
@@ -721,7 +744,7 @@ public class Driver extends Application {
 		athText.setFont(Font.font("Courier", FontWeight.BOLD, 28));
 		athText.setUnderline(true);
 		Button ret = new Button("Return to Main Menu");
-		ret.setTextFill(Color.BLUE);/* add button to stage(window) */
+		ret.setTextFill(Color.BLUE);
 		ret.setFont(Font.font(15));
 		ret.setOnAction(e -> ret.getScene().setRoot(MainMenu()));
 
@@ -763,7 +786,7 @@ public class Driver extends Application {
 
 	}
 
-	/* choosing an official */
+	/* Choosing an official method */
 	public Official chooseOfficial(String offID) {
 
 		int index = -1;
@@ -784,20 +807,20 @@ public class Driver extends Application {
 
 	}
 
-	/*
-	 * ================================================= ================== /*
-	 * =====================starting the game =================
-	 * ======================================
-	 */
+	/************************************ RUNNING THE GAME  **********************************************/
+	
 	public GridPane startGame(Game theGame) {
 
+		/**COMPETE METHOD **/
 		for (int i = 0; i < competitors.length; i++) {
 			if (competitors[i] != null) {
 				competitors[i].compete(theGame, competitors[i]);
 			}
 		}
 		Official referee = theGame.getOfficial();
+		/** DECIDING WHO IS THE WINNER **/
 		referee.summariseScore(competitors, theGame);
+		/** UPDATING BOTH GAME RESULTS TABLE AND GAME RESULTS TEXT FILE **/
 		db.updateResults(theGame, competitors);
 		db.writeGameResults(theGame, competitors);
 
@@ -812,7 +835,7 @@ public class Driver extends Application {
 		resultText.setUnderline(true);
 
 		Button ret = new Button("Return to Main Menu");
-		ret.setTextFill(Color.BLUE);/* add button to stage(window) */
+		ret.setTextFill(Color.BLUE);
 		ret.setFont(Font.font(15));
 		ret.setOnAction(e -> ret.getScene().setRoot(MainMenu()));
 
@@ -822,6 +845,7 @@ public class Driver extends Application {
 		gtxt.setFont(Font.font("Courier", FontWeight.NORMAL, 25));
 		pane.add(gtxt, 0, 1);
 
+		/*prints out the results of the finished current game */
 		for (int i = 0; i < competitors.length; i++) {
 			if (competitors[i] != null) {
 				String s = theGame.getOfficial().printResults(competitors[i], theGame);
@@ -836,11 +860,8 @@ public class Driver extends Application {
 
 	}
 
-	/*
-	 * =========================================================================
-	 * printing out all games details and their winners depending on what type
-	 * =======================================================================
-	 */
+	/********************************* PRINTING ALL FINISHED GAMES ********************************************/
+	
 	public GridPane gameResults() {
 		Iterator reader = gameList.iterator();
 
@@ -855,7 +876,7 @@ public class Driver extends Application {
 		resultText.setUnderline(true);
 
 		Button ret = new Button("Return to Main Menu");
-		ret.setTextFill(Color.BLUE);/* add button to stage(window) */
+		ret.setTextFill(Color.BLUE);
 		ret.setFont(Font.font(15));
 		ret.setOnAction(e -> ret.getScene().setRoot(MainMenu()));
 
@@ -877,6 +898,8 @@ public class Driver extends Application {
 		pane.add(ret, 0, 0);
 		return pane;
 	}
+	
+	/*check the game type to decide which print game method to use */
 
 	public String gameCheck(Game theGame) {
 
@@ -893,11 +916,7 @@ public class Driver extends Application {
 
 	}
 
-	/*----------------------------------------------------------
-	 * ---------------------------------------------------------
-	 * ---------- TO DISPLAY ATHLETE POINTS ----------
-	 * ---------------------------------------------------------
-	 */
+/**************************************** PRINTING ATHLETES POINTS **************************************/
 	public GridPane athleteList() {
 		/* initializing the text and button for game details display */
 		GridPane pane = new GridPane();

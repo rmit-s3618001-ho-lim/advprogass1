@@ -4,7 +4,7 @@ import java.util.Random;
 
 public class Cyclists extends Athletes{
 
-	/* cyclists constructors */
+	//cyclists constructors 
 	public Cyclists(String IDs, String types, String names, int ages, String states) {
 		super(IDs, types, names, ages, states);
 	}
@@ -23,7 +23,7 @@ public class Cyclists extends Athletes{
 	}
 
 
-	// prints out all cyclists ID, name and their points //
+	// returns cyclist details for printing
 	public String print() {
 		String cycleID = getID();
 		String cycleName = getName();

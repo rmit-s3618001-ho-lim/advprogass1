@@ -1,3 +1,4 @@
+// author: Cherng Ho Lim s3618001
 
 public class RunningGame extends Game {
 	
@@ -29,9 +30,7 @@ public class RunningGame extends Game {
 
 	}
 
-	// randomly choosing sprinters or superathletes from respective array to
-	// participate in current game
-	// also ensure that the same athlete is not added to current game
+	// checks if athlete chosen can be added to game
 	public int chooseCompetitors(Athletes[] competitors, Athletes[] theList, String ID) {
 		try {
 			int count = competitors.length;
@@ -41,7 +40,8 @@ public class RunningGame extends Game {
 					count--;
 				}
 			}
-
+			
+			//count the current number of competitors in game
 			same.validate(competitors, ID, count);
 
 			int index = -1;
@@ -64,7 +64,6 @@ public class RunningGame extends Game {
 						break;
 					}
 				}
-
 			}
 
 			return 1;
@@ -84,8 +83,6 @@ public class RunningGame extends Game {
 		}
 
 	// prints out running game details including their winners
-	// prints out different message if the game was either cancelled or never
-	// started
 		public String printResults() {
 			String gameID = getGameID();
 			Official off = getOfficial();

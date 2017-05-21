@@ -1,9 +1,12 @@
+// author: Cherng Ho Lim s3618001
+
 import java.util.ArrayList;
 
 public class Exceptions {
 
 }
 
+/* to check if a game exists to be run */
 class gameExist {
 	public gameExist() {
 	};
@@ -16,6 +19,7 @@ class gameExist {
 	}
 }
 
+/* to check if a game has enough athletes */
 class NotEnoughAthletes {
 	public NotEnoughAthletes() {
 	};
@@ -33,6 +37,7 @@ class NotEnoughAthletes {
 	}
 }
 
+/* to check if a game has already been run */
 class gameRunOnce {
 	public gameRunOnce() {
 	};
@@ -45,6 +50,7 @@ class gameRunOnce {
 
 }
 
+/* to check if a game has a referee */
 class NoReferee {
 	public NoReferee() {
 	};
@@ -57,6 +63,7 @@ class NoReferee {
 
 }
 
+/* to check if an athlete can still be added to game */
 class gameFull {
 	public gameFull() {
 	};
@@ -75,7 +82,7 @@ class gameFull {
 
 }
 
-
+/* to check if the athlete being added is a cyclist or superathlete */
 class WrongCycleGame {
 	public WrongCycleGame() {
 	};
@@ -87,6 +94,7 @@ class WrongCycleGame {
 	}
 }
 
+/* to check if the athlete being added is a swimmer or superathlete */
 class WrongSwimGame {
 	public WrongSwimGame() {
 	};
@@ -98,6 +106,7 @@ class WrongSwimGame {
 	}
 }
 
+/* to check if the athlete being added is a sprinter or superathlete */
 class WrongSprintGame {
 	public WrongSprintGame() {
 	};
@@ -109,6 +118,7 @@ class WrongSprintGame {
 	}
 }
 
+/* to check if the athlete being added has already been added */
 class SameAth {
 	public SameAth() {
 	};
