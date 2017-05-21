@@ -1,7 +1,6 @@
 SW01, Swimmer, Bob, 34, VIC
 SW02, Swimmer, Terry, 50, ACT
 CY03, Cyclists, Bruce, 60, TAS
-U R A SPY
 , Swimmer, Lim, 32, VIC
 SW05, Swimmer, Lim, 32, VIC
 SW03, Swimmer, James, 60, NT
