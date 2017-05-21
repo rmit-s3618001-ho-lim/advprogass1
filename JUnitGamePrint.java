@@ -1,9 +1,8 @@
-// author: Zhipeng Li s3581721
+
 
 import static org.junit.Assert.*;
 
 import org.junit.Test;
-
 import org.junit.Before;
 
 

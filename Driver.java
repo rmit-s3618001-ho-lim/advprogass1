@@ -323,6 +323,7 @@ public class Driver extends Application {
 			} catch (GameFullException a) {
 				lab.setText("You cannot add more than 8 athletes in a game");
 			}
+			
 		});
 
 		/* Button to choice an official */
@@ -337,6 +338,7 @@ public class Driver extends Application {
 		ret.setFont(Font.font(20));
 		ret.setOnAction(e -> {
 			gameList.add(newGame);
+			System.out.println("Game successfully created");
 			ret.getScene().setRoot(newGameDetails());
 		});
 
@@ -388,6 +390,7 @@ public class Driver extends Application {
 			} else if (swimError == 0) {
 				lab.setText("You must choose swimmers or superathletes");
 			} else {
+				System.out.println("Athlete successfully added");
 				addAth.getScene().setRoot(swimGameMenu());
 			}
 		});
@@ -456,6 +459,7 @@ public class Driver extends Application {
 		ret.setFont(Font.font(20));
 		ret.setOnAction(e -> {
 			gameList.add(newGame);
+			System.out.println("Game successfully created");
 			ret.getScene().setRoot(newGameDetails());
 		});
 
@@ -506,6 +510,7 @@ public class Driver extends Application {
 			} else if (sprintError == 0) {
 				lab.setText("You must choose sprinters or superathletes");
 			} else {
+				System.out.println("Athlete successfully added");
 				addAth.getScene().setRoot(runGameMenu());
 			}
 		});
@@ -573,6 +578,7 @@ public class Driver extends Application {
 		ret.setFont(Font.font(20));
 		ret.setOnAction(e -> {
 			gameList.add(newGame);
+			System.out.println("Game successfully created");
 			ret.getScene().setRoot(newGameDetails());
 		});
 		pane.add(text1, 3, 0);
@@ -623,6 +629,7 @@ public class Driver extends Application {
 			} else if (cycleError == 0) {
 				lab.setText("You must choose cyclists or superathletes");
 			} else {
+				System.out.println("Athlete successfully added");
 				addAth.getScene().setRoot(cycleGameMenu());
 			}
 		});
@@ -697,6 +704,7 @@ public class Driver extends Application {
 				lab.setText("The inputted ID does not exist");
 			} else {
 				newGame.setOfficial(officialchoice);
+				System.out.println("Official successfully added");
 				if (newGame instanceof SwimmingGame) {
 					addOff.getScene().setRoot(swimGameMenu());
 				} else if (newGame instanceof RunningGame) {

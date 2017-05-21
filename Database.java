@@ -27,19 +27,22 @@ public class Database {
 	// also drop and creates participants and game results tables
 	public boolean connection() {
 
+		
 		Connection connection = null;
 
 
 		try {
 			// Registering the HSQLDB JDBC driver
 			Class.forName("org.hsqldb.jdbcDriver");
-			connection = DriverManager.getConnection("jdbc:hsqldb:hsql://localhost/testdb", "SA", "");
+			connection = DriverManager.getConnection("jdbc:hsqldb:AssignDB", "sa", "123");
+
 			if (connection != null) {
 				System.out.println("Connection created successfully");
 
 			} else {
 				System.out.println("Problem with creating connection");
 			}
+
 			// creating new Participants and gameresults table
 			connection.prepareStatement("DROP table participants if exists;").execute();
 			connection.prepareStatement("DROP table gameResults if exists;").execute();
@@ -63,13 +66,14 @@ public class Database {
 
 	// insert the participants into participants database
 	public void insertParticipants() {
-	
+		
 		Connection connection = null;
 
+		
 		try {
 			// Registering the HSQLDB JDBC driver
 			Class.forName("org.hsqldb.jdbcDriver");
-			connection = DriverManager.getConnection("jdbc:hsqldb:hsql://localhost/testdb", "SA", "");
+			connection = DriverManager.getConnection("jdbc:hsqldb:AssignDB", "sa", "123");
 
 			/** INSERTING PARTICIPANTS **/
 			/* Swimmers */
@@ -147,12 +151,12 @@ public class Database {
 		Connection connection = null;
 		ResultSet rs = null;
 		Statement stmt = null;
-		
+
 
 		try {
 			// Registering the HSQLDB JDBC driver
 			Class.forName("org.hsqldb.jdbcDriver");
-			connection = DriverManager.getConnection("jdbc:hsqldb:hsql://localhost/testdb", "SA", "");
+			connection = DriverManager.getConnection("jdbc:hsqldb:AssignDB", "sa", "123");
 
 			stmt = connection.createStatement();
 			rs = stmt.executeQuery("SELECT * FROM participants");
@@ -199,15 +203,14 @@ public class Database {
 	//update the game results table after a game has finished
 	public void updateResults(Game game, Athletes[] competitors) {
 
-	
 		Connection connection = null;
 
-	
+		
 
 		try {
 			// Registering the HSQLDB JDBC driver
 			Class.forName("org.hsqldb.jdbcDriver");
-			connection = DriverManager.getConnection("jdbc:hsqldb:hsql://localhost/testdb", "SA", "");
+			connection = DriverManager.getConnection("jdbc:hsqldb:AssignDB", "sa", "123");
 
 			String gameID = game.getGameID();
 			String offName = game.getOfficial().getName();
@@ -232,6 +235,7 @@ public class Database {
 
 			}
 
+			System.out.println("gameResults database updated...");
 		} catch (SQLException e2) {
 			e2.printStackTrace();
 		} catch (ClassNotFoundException e2) {
@@ -409,6 +413,8 @@ public class Database {
 			writer.write("\r\n");
 			writer.write("\r\n");
 			writer.close();
+			
+			System.out.println("gameResults.txt updated...");
 
 		} catch (IOException e) {
 			System.out.println("Connection error");

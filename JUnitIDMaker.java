@@ -1,4 +1,4 @@
-// author: Zhipeng Li s3581721
+
 
 import static org.junit.Assert.*;
 
